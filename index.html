@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Synapse: Digital Weave</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;700&display=swap');
+
+    /* Global tweaks to prevent logo cropping / layout surprises */
+    *, *::before, *::after { box-sizing: border-box; }
+    img { display: block; max-width: 100%; height: auto; }
+
+    :root{
+      --bolt-green:#32BB78;--bolt-charade:#2F313F;--bolt-athens-gray:#F9FAFB;--bolt-white:#FFFFFF;--bolt-error-red:#D32F2F;
+      --background-start-color:var(--bolt-white);--background-end-color:var(--bolt-green);--container-background:var(--bolt-white);
+      --text-primary:var(--bolt-charade);--border-color:rgba(47,49,63,.12);--progress-bar-bg:rgba(50,187,120,.12);
+      --progress-bar-fill:linear-gradient(90deg,#1abc9c,var(--bolt-green));--nav-background:rgba(255,255,255,.95);
+      --nav-text-color:var(--bolt-charade);--nav-item-hover:rgba(50,187,120,.15);--button-shadow-color:rgba(0,0,0,.12);
+      --main-title-color:var(--bolt-charade);--section-title-color:var(--bolt-charade);--label-color:var(--bolt-charade);
+    }
+
+    body{
+      font-family:'Inter',sans-serif;margin:0;padding:0;
+      background:linear-gradient(to bottom,var(--background-start-color) 60%,var(--background-end-color) 100%);
+      color:var(--text-primary);display:flex;flex-direction:column;min-height:100vh;overflow-x:hidden;position:relative;
+    }
+
+    .app-header{
+      background-color:var(--nav-background);
+      padding:16px clamp(16px,4vw,40px);
+      display:flex;justify-content:space-between;align-items:center;
+      gap:16px;
+      box-shadow:0 4px 15px rgba(0,0,0,.08);
+      position:sticky;top:0;width:100%;z-index:10;
+    }
+
+    /* FIX: the second selector was missing a dot – caused the right logo to not get sized */
+    .header-logo-left, .header-logo-right { max-height:44px; width:auto; transition:transform .3s ease; }
+    .header-logo-left:hover, .header-logo-right:hover { transform:scale(1.05) }
+    .header-logo-left { filter:drop-shadow(0 0 8px rgba(0,0,0,.08)); }
+    .header-logo-right { opacity:.9; }
+
+    nav ul{list-style:none;margin:0;padding:0;display:flex;gap:30px;flex-wrap:wrap;align-items:center;}
+    nav ul li{margin:0}
+    nav ul li a{
+      color:var(--nav-text-color);text-decoration:none;font-weight:500;font-size:1.05em;
+      padding:8px 15px;border-radius:5px;position:relative;
+      transition:color .3s ease,background-color .3s ease,box-shadow .3s ease;
+    }
+    nav ul li a:hover{color:var(--bolt-green);background-color:var(--nav-item-hover);box-shadow:0 0 10px rgba(50,187,120,.3)}
+    nav ul li a.active{color:var(--bolt-green);background-color:var(--nav-item-hover);box-shadow:0 0 15px rgba(50,187,120,.5);font-weight:700}
+
+    .main-content{flex-grow:1;display:flex;justify-content:center;align-items:center;padding:40px 20px;position:relative;z-index:1;}
+    .container{
+      background-color:var(--container-background);border-radius:12px;
+      box-shadow:0 8px 16px rgba(0,0,0,.08);
+      padding:40px;width:100%;max-width:800px;border:1px solid var(--border-color);
+      position:relative;overflow:hidden;z-index:1;display:flex;flex-direction:column;align-items:center;gap:25px;
+    }
+
+    header{width:100%;text-align:center;}
+    header h1{font-family:'Orbitron',sans-serif;font-size:3em;margin-bottom:5px;color:var(--main-title-color);letter-spacing:2px;text-align:center;}
+    p.tagline{font-size:1.1em;color:var(--text-primary);opacity:.9;margin:0 0 30px;text-align:center;}
+
+    .input-section{width:100%;display:flex;flex-direction:column;gap:20px;align-items:center;}
+    .form-group{width:100%;max-width:500px;display:flex;flex-direction:column;align-items:flex-start;}
+    label{display:block;margin-bottom:5px;font-weight:600;color:var(--label-color);font-size:1em;white-space:nowrap;}
+    input[type="url"],select,input[type="file"]{
+      width:100%;padding:12px;border:1px solid var(--border-color);border-radius:8px;background-color:var(--bolt-white);
+      color:var(--text-primary);font-size:1em;transition:border-color .3s ease,box-shadow .3s ease,background-color .3s ease;
+    }
+    input[type="url"]:focus,select:focus,input[type="file"]:focus{
+      border-color:var(--bolt-green);box-shadow:0 0 0 4px rgba(50,187,120,.2);background-color:var(--bolt-white);outline:none;
+    }
+    select{
+      -webkit-appearance:none;-moz-appearance:none;appearance:none;
+      background-image:url('data:image/svg+xml;utf8,<svg fill="%232F313F" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+      background-repeat:no-repeat;background-position:right 15px center;background-size:24px;cursor:pointer;
+    }
+
+    .button-group{width:100%;text-align:center;margin-top:20px;}
+    button{
+      padding:14px 28px;border:none;border-radius:10px;background:linear-gradient(90deg,var(--bolt-green) 0%,#2ca86a 100%);
+      color:var(--bolt-white);font-size:1.1em;font-weight:600;cursor:pointer;
+      transition:background .4s ease,transform .3s ease,box-shadow .4s ease;
+      box-shadow:0 5px 12px var(--button-shadow-color),0 0 12px rgba(50,187,120,.4);
+      position:relative;overflow:hidden;
+    }
+    button::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:rgba(255,255,255,.3);transform:skewX(-30deg);transition:all .5s ease;}
+    button:hover::before{left:100%}
+    button:hover{background:linear-gradient(90deg,#2ca86a 0%,var(--bolt-green) 100%);transform:translateY(-2px);box-shadow:0 7px 15px var(--button-shadow-color),0 0 15px rgba(50,187,120,.6);}
+    button:active{transform:translateY(0);box-shadow:0 3px 8px var(--button-shadow-color);}
+
+    .progress-container{
+      width:100%;max-width:500px;background-color:var(--progress-bar-bg);border-radius:5px;margin-top:15px;height:10px;overflow:hidden;display:none;
+      box-shadow:inset 0 1px 3px rgba(0,0,0,.1);position:relative;
+    }
+    .progress-bar{height:100%;width:0%;background:var(--progress-bar-fill);border-radius:5px;transition:width .5s cubic-bezier(.25,.8,.25,1);position:absolute;top:0;left:0;animation:pulseProgress 2s infinite alternate;}
+    @keyframes pulseProgress{0%{opacity:.8}100%{opacity:1}}
+
+    .status-message{margin-top:10px;text-align:center;font-size:.95em;opacity:.9;min-height:20px;font-weight:400;color:var(--text-primary);}
+    .output-section{width:100%;max-width:500px;margin-top:30px;border-top:1px solid var(--border-color);padding-top:25px;display:flex;flex-direction:column;gap:10px;text-align:left;}
+    .output-item{font-size:1em;color:var(--text-primary);display:flex;justify-content:space-between;line-height:1.4;}
+    .output-value{font-weight:600;color:var(--bolt-charade);}
+    .output-link{color:var(--bolt-green);text-decoration:none;font-weight:600;transition:color .3s ease;}
+    .output-link:hover{text-decoration:underline;color:#2ca86a;}
+
+    @media (max-width: 992px){
+      .container{max-width:700px;padding:30px}
+      header h1{font-size:2.5em}
+    }
+    @media (max-width: 600px){
+      .app-header{flex-direction:column;align-items:center;gap:10px;padding:10px 20px}
+      nav ul{margin-top:8px;flex-direction:column;align-items:center;gap:8px}
+      /* FIX: make sure both logos shrink on mobile */
+      .header-logo-left, .header-logo-right{max-height:30px}
+      .container{padding:25px 15px;margin:15px}
+      header h1{font-size:2em}
+      button{padding:10px 20px;font-size:1em}
+      .output-section{padding-top:20px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app-header">
+    <img src="https://synapseimage.s3.eu-north-1.amazonaws.com/images/cognizant-logo.png" alt="Cognizant Logo" class="header-logo-right">
+    <nav>
+      <ul>
+        <li><a href="index.html" class="active">Scraper & OCR</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="instructions.html">Instructions</a></li>
+      </ul>
+    </nav>
+    <img src="https://synapseimage.s3.eu-north-1.amazonaws.com/images/synapselogo.png" alt="Synapse Logo" class="header-logo-left">
+  </div>
+
+  <div class="main-content">
+    <div class="container">
+      <header>
+        <h1>Synapse Web App</h1>
+        <p class="tagline">Extract data from web & images effortlessly.</p>
+      </header>
+
+      <div class="input-section">
+        <div class="form-group">
+          <label for="sourceOption">Source:</label>
+          <select id="sourceOption">
+            <option value="">Select an operation.</option>
+            <option value="web_scrape_menu_items">Web Scrape: Restaurant Menu</option>
+            <!-- The other options are placeholders for future features -->
+            <option value="web_scrape_full_page_text" disabled>Foodora</option>
+            <option value="web_scrape_product_details" disabled>Restaurant personal website</option>
+            <option value="web_scrape_article_content" disabled>Tazz</option>
+            <option value="web_scrape_custom_selector" disabled>uberEats</option>
+            <option value="ocr_image" disabled>Wolt</option>
+            <option value="ocr_tables" disabled>Foody</option>
+            <option value="ocr_type" disabled>JustEat</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="urlInputGroup">
+          <label for="targetUrl">Web URL:</label>
+          <input type="url" id="targetUrl" placeholder="e.g. https://example.com/menu">
+        </div>
+
+        <div class="button-group">
+          <button id="processButton">Process Request</button>
+        </div>
+
+        <div id="progressBarContainer" class="progress-container">
+          <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div class="status-message" id="statusMessage"></div>
+      </div>
+
+      <div class="output-section" id="outputSection" style="display:none;">
+        <div class="output-item">Artifacts:
+          <a href="https://eu-north-1.console.aws.amazon.com/s3/buckets/project-synapse-processed-data-vinesh?region=eu-north-1&bucketType=general&prefix=zip%2F&showversions=false&tab=objects"
+             id="artifactsLink" class="output-link" style="display:none;">Open the .zip folder</a>
+        </div>
+        <div class="output-item">Filenames: <span id="artifactNames" class="output-value">—</span></div>
+        <div class="output-item">Dishes: <span id="totalDishes" class="output-value">0</span></div>
+        <div class="output-item">Photos: <span id="totalPhotos" class="output-value">0</span></div>
+        <div class="output-item">Categories: <span id="totalCategories" class="output-value">0</span></div>
+        <div class="output-item">Options: <span id="totalOptions" class="output-value">0</span></div>
+        <div class="output-item">Option Groups: <span id="totalOptionGroups" class="output-value">0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==== CONFIG ====
+    const API_BASE = 'https://d1nxhjhduvj12x.cloudfront.net/Dev/scraper-function';
+
+    // ==== DOM ====
+    const sourceOptionSelect = document.getElementById('sourceOption');
+    const targetUrlInput = document.getElementById('targetUrl');
+    const processButton = document.getElementById('processButton');
+    const progressBarContainer= document.getElementById('progressBarContainer');
+    const progressBar = document.getElementById('progressBar');
+    const statusMessage = document.getElementById('statusMessage');
+    const outputSection = document.getElementById('outputSection');
+    const artifactsLink = document.getElementById('artifactsLink');
+    const artifactNames = document.getElementById('artifactNames');
+    const totalDishesSpan = document.getElementById('totalDishes');
+    const totalPhotosSpan = document.getElementById('totalPhotos');
+    const totalCategoriesSpan = document.getElementById('totalCategories');
+    const totalOptionsSpan = document.getElementById('totalOptions');
+    const totalOptionGroupsSpan = document.getElementById('totalOptionGroups');
+
+    // ==== UI helpers ====
+    function showStatus(msg, color = 'var(--text-primary)') {
+      statusMessage.textContent = msg;
+      statusMessage.style.color = color;
+    }
+    function setProgress(pct) {
+      progressBarContainer.style.display = 'block';
+      progressBar.style.width = pct + '%';
+    }
+    function finishProgress() {
+      setProgress(100);
+      setTimeout(() => {
+        progressBarContainer.style.display = 'none';
+        progressBar.style.width = '0%';
+      }, 1500);
+    }
+    function resetOutputs() {
+      outputSection.style.display = 'none';
+      artifactsLink.style.display = 'none';
+      artifactsLink.href = 'https://eu-north-1.console.aws.amazon.com/s3/buckets/project-synapse-processed-data-vinesh?region=eu-north-1&bucketType=general&prefix=zip%2F&showversions=false&tab=objects';
+      artifactNames.textContent = '—';
+      totalDishesSpan.textContent = '0';
+      totalPhotosSpan.textContent = '0';
+      totalCategoriesSpan.textContent = '0';
+      totalOptionsSpan.textContent = '0';
+      totalOptionGroupsSpan.textContent = '0';
+    }
+    function applyStatusToProgress(status) {
+      const map = {
+        navigating:20, cookies_closed:30, reading_menu:30, scrolling:40,
+        extracting:50, translating:60, saving_csv:70, uploading_s3:80,
+        importing:90, completed:100
+      };
+      const pct = map[status] ?? 10;
+      setProgress(pct);
+      showStatus(status ? `Status: ${status.replace('_',' ')}` : 'Starting...');
+    }
+
+    // ==== robust start with retries ====
+    async function startScrapeWithRetries(url, maxAttempts = 3) {
+      let lastErr;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+          const resp = await fetch(API_BASE, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ url })
+          });
+          if (!resp.ok) {
+            const text = await resp.text().catch(()=> '');
+            throw new Error(`HTTP ${resp.status}${text ? `: ${text.slice(0,200)}`:''}`);
+          }
+          const raw = await resp.text();
+          const data = JSON.parse(raw);
+          if (!data || !data.jobId) throw new Error('Missing jobId in response');
+          return data.jobId;
+        } catch (err) {
+          lastErr = err;
+          if (attempt < maxAttempts) {
+            showStatus(`Retrying start (${attempt+1}/${maxAttempts})…`,'var(--bolt-green)');
+            await new Promise(r => setTimeout(r, 1500*attempt));
+          }
+        }
+      }
+      throw lastErr || new Error('Failed to start scrape');
+    }
+
+    // ==== Main click ====
+    processButton.addEventListener('click', async () => {
+      resetOutputs();
+      const selected = sourceOptionSelect.value;
+      if (!selected) { showStatus('Please select an operation.', 'var(--bolt-error-red)'); return; }
+      if (!selected.startsWith('web_scrape')) {
+        showStatus('This operation is not available yet.', 'var(--bolt-error-red)');
+        return;
+      }
+      const url = (targetUrlInput.value || '').trim();
+      if (!url) { showStatus('Please enter a Web URL.', 'var(--bolt-error-red)'); return; }
+
+      showStatus('Starting scrape…','var(--bolt-green)');
+      setProgress(5);
+
+      try {
+        const jobId = await startScrapeWithRetries(url, 3);
+        showStatus('Scrape started…','var(--bolt-green)');
+        setProgress(20);
+
+        const poll = setInterval(async () => {
+          try {
+            const res = await fetch(`${API_BASE}?jobId=${encodeURIComponent(jobId)}`);
+            const status = await res.json();
+            if (!res.ok) throw new Error(status && status.error ? status.error : `HTTP ${res.status}`);
+
+            applyStatusToProgress(status.status);
+
+            if (status.status === 'completed') {
+              clearInterval(poll);
+              finishProgress();
+              showStatus('Scrape complete!','var(--bolt-green)');
+
+              // counters
+              outputSection.style.display = 'flex';
+              if (status.counters) {
+                totalDishesSpan.textContent = status.counters.dishes ?? 0;
+                totalCategoriesSpan.textContent = status.counters.categories ?? 0;
+                totalPhotosSpan.textContent = status.counters.images ?? 0;
+                totalOptionsSpan.textContent = status.counters.options ?? 0;
+                totalOptionGroupsSpan.textContent= status.counters.optionGroups ?? 0;
+              }
+
+              // artifacts summary (folder + filenames)
+              const a = status.artifacts;
+              if (a && a.fileNames) {
+                const namesOrdered = [a.fileNames.dishes, a.fileNames.options, a.fileNames.optionGroups, a.fileNames.json]
+                  .filter(Boolean);
+                artifactNames.textContent = namesOrdered.join(', ');
+                artifactsLink.href = 'https://eu-north-1.console.aws.amazon.com/s3/buckets/project-synapse-processed-data-vinesh?region=eu-north-1&bucketType=general&prefix=zip%2F&showversions=false&tab=objects';
+                artifactsLink.style.display = 'inline';
+                artifactsLink.textContent = 'Open the .zip folder';
+              } else {
+                artifactsLink.style.display = 'none';
+                artifactNames.textContent = 'Not available';
+              }
+            } else if (status.status === 'error') {
+              clearInterval(poll);
+              finishProgress();
+              showStatus(`Error: ${status.error || 'Unknown error'}`, 'var(--bolt-error-red)');
+              resetOutputs();
+            }
+          } catch (err) {
+            clearInterval(poll);
+            finishProgress();
+            console.error('Poll error:', err);
+            showStatus(`Error: ${err.message}`, 'var(--bolt-error-red)');
+            resetOutputs();
+          }
+        }, 10000);
+      } catch (err) {
+        finishProgress();
+        console.error('Start error:', err);
+        showStatus(`Start failed: ${err.message}`, 'var(--bolt-error-red)');
+      }
+    });
+  </script>
+</body>
+</html>

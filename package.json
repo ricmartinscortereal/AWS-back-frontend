@@ -1,0 +1,32 @@
+{
+  "name": "restaurant-scraper",
+  "version": "1.0.0",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-textract": "^3.859.0",
+    "@google-cloud/translate": "^8.5.1",
+    "@sparticuz/chromium-min": "^127.0.0",
+    "airtable": "^0.12.2",
+    "archiver": "^7.0.1",
+    "aws-sdk": "^2.1674.0",
+    "aws-serverless-express": "^3.4.0",
+    "axios": "^1.7.7",
+    "cors": "^2.8.5",
+    "csv-parse": "^5.5.6",
+    "csv-writer": "^1.6.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "he": "^1.2.0",
+    "multer": "^1.4.5-lts.1",
+    "puppeteer-core": "^23.5.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "rebrowser-puppeteer-core": "^24.8.1",
+    "sharp": "^0.33.5",
+	"uuid": "^9.0.0",
+	"adm-zip": "^0.5.14"
+  },
+  "keywords": [],
+  "author": "",
+  "description": "Local restaurant scraper and image resizer"
+}
